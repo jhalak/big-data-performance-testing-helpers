@@ -1,0 +1,14 @@
+{
+    "name": "jacks/mysql-performance-tester",
+    "description": "Create dummy data for mysql performace testing",
+    "authors": [
+        {
+            "name": "Jhalak",
+            "email": "jhalak1983@gmail.com"
+        }
+    ],
+    "require": {
+        "fzaninotto/faker": "^1.7",
+        "illuminate/database": "v5.5.40"
+    }
+}
