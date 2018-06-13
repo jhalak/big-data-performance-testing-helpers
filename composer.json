@@ -10,5 +10,10 @@
     "require": {
         "fzaninotto/faker": "^1.7",
         "illuminate/database": "v5.5.40"
+    },
+    "autoload": {
+        "classmap": [
+            "lib"
+        ]
     }
 }

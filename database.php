@@ -2,7 +2,7 @@
 /**
  * database.php
  *
- * @author: onirudda.odikare@widespace.com
+ * @author: Onirudda Odikare Jhalak <jhalak1983@gmail.com>
  * @created on: 6/10/18
  */
 

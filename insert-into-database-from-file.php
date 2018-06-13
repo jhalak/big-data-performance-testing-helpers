@@ -23,8 +23,7 @@ echo "Writing records in students table from file ... " . PHP_EOL;
 
 
 try {
-	$timeFrom = new DateTime('now');
-
+	TimeTracker::start();
 	$query = 'LOAD DATA LOCAL INFILE \'' . $filename . '\' 
 		INTO TABLE students 
 		CHARACTER SET UTF8 
@@ -32,9 +31,8 @@ try {
 		ENCLOSED BY \'\\"\' 
 		LINES TERMINATED BY \'\n\'';
 	Database::connection()->getPdo()->exec(Database::raw($query));
-	$timeTo = new DateTime('now');
-	$diff = $timeFrom->diff($timeTo);
-	echo PHP_EOL . "DONE in " . $diff->s . ' seconds (' . $diff->i . ' minutes)';
+	TimeTracker::end();
+	TimeTracker::showTimeDiff();
 
 } catch (Exception $e) {
 	echo $e->getMessage();

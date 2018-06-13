@@ -12,13 +12,17 @@ use Illuminate\Database\Capsule\Manager as Database;
 
 $faker = Faker\Factory::create();
 
-$numberOrRows = 10000;
+if (count($argv) < 2) {
+	print "Argument missing: " . PHP_EOL;
+	print "Example: php insert-into-database.php [numberOfRows]" . PHP_EOL;
+	exit();
+}
 
-echo "Creating $numberOrRows records in students table ... " . PHP_EOL;
-
+$numberOrRows = $argv[1];
+printf("Creating %d records in students table ... " . PHP_EOL, $numberOrRows);
 
 try {
-	$timeFrom = new DateTime('now');
+	TimeTracker::start();
 	for ($i = 0; $i < $numberOrRows; $i++) {
 		Database::table('students')->insert([
 			'joinDate' 	=> $faker->date('Y-m-d'),
@@ -31,9 +35,8 @@ try {
 			echo ".";
 		}
 	}
-	$timeTo = new DateTime('now');
-	$diff = $timeFrom->diff($timeTo);
-	echo PHP_EOL . "DONE in " . $diff->s . ' seconds (' . $diff->i . ' minutes)';
+	TimeTracker::end();
+	TimeTracker::showTimeDiff();
 
 } catch (Exception $e) {
 	echo $e->getMessage();
