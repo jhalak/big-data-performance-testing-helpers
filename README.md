@@ -1,5 +1,4 @@
-asAA/'
-/##`Mysql performance testing helper scripts`
+##`Mysql performance testing helper scripts`
 
 > Our goal was to test how mysql performs with or without applying various performance optimization technique for big data. 
 For this we need a mysql table and a large number of rows in that table (i.e. 20 millions).
