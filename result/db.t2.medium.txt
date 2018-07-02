@@ -1,0 +1,90 @@
+Machine type : AWS mysql db.t2.medium
+Engine type  : MySQL 5.6.39
+Storage Type : General Purpose (SSD)
+
+============== Select with un-indexed ====================
+
+mysql> select * from students where id = 19999999;
++----------+------------+---------------+----------------+-----------------------------------------------+
+| id       | joinDate   | name          | regNo          | address                                       |
++----------+------------+---------------+----------------+-----------------------------------------------+
+| 19999999 | 1986-10-18 | Arne Bode DDS | 21365285423197 | 1793 O'Keefe FieldsDeborahfurt, SC 85178-6867 |
++----------+------------+---------------+----------------+-----------------------------------------------+
+1 row in set (0.01 sec)
+
+mysql> select count(*) from students where joinDate = "1986-10-18";
++----------+
+| count(*) |
++----------+
+|     1183 |
++----------+
+1 row in set (4.07 sec)
+
+mysql> select * from students where regNo = 21365285423197;
++----------+------------+---------------+----------------+-----------------------------------------------+
+| id       | joinDate   | name          | regNo          | address                                       |
++----------+------------+---------------+----------------+-----------------------------------------------+
+| 19999999 | 1986-10-18 | Arne Bode DDS | 21365285423197 | 1793 O'Keefe FieldsDeborahfurt, SC 85178-6867 |
++----------+------------+---------------+----------------+-----------------------------------------------+
+1 row in set (7.17 sec)
+
+mysql> select * from students where name like "Arne Bode DDS";
++----------+------------+---------------+----------------+-----------------------------------------------+
+| id       | joinDate   | name          | regNo          | address                                       |
++----------+------------+---------------+----------------+-----------------------------------------------+
+| 19999999 | 1986-10-18 | Arne Bode DDS | 21365285423197 | 1793 O'Keefe FieldsDeborahfurt, SC 85178-6867 |
++----------+------------+---------------+----------------+-----------------------------------------------+
+1 row in set (7.73 sec)
+
+mysql> select * from students where address like "1793 O'Keefe FieldsDeborahfurt, SC 85178-6867";
++----------+------------+---------------+----------------+-----------------------------------------------+
+| id       | joinDate   | name          | regNo          | address                                       |
++----------+------------+---------------+----------------+-----------------------------------------------+
+| 19999999 | 1986-10-18 | Arne Bode DDS | 21365285423197 | 1793 O'Keefe FieldsDeborahfurt, SC 85178-6867 |
++----------+------------+---------------+----------------+-----------------------------------------------+
+1 row in set (7.74 sec)
+
+=============== Creating index ================
+mysql> create index idx_regNo on students (regNo);
+Query OK, 0 rows affected (1 min 24.82 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+============== Select with indexed data ====================
+mysql> select * from students where regNo = 21365285423197;
++----------+------------+---------------+----------------+-----------------------------------------------+
+| id       | joinDate   | name          | regNo          | address                                       |
++----------+------------+---------------+----------------+-----------------------------------------------+
+| 19999999 | 1986-10-18 | Arne Bode DDS | 21365285423197 | 1793 O'Keefe FieldsDeborahfurt, SC 85178-6867 |
++----------+------------+---------------+----------------+-----------------------------------------------+
+1 row in set (0.03 sec)
+
+mysql> select * from students where name like "Arne Bode DDS";
++----------+------------+---------------+----------------+-----------------------------------------------+
+| id       | joinDate   | name          | regNo          | address                                       |
++----------+------------+---------------+----------------+-----------------------------------------------+
+| 19999999 | 1986-10-18 | Arne Bode DDS | 21365285423197 | 1793 O'Keefe FieldsDeborahfurt, SC 85178-6867 |
++----------+------------+---------------+----------------+-----------------------------------------------+
+1 row in set (7.68 sec)
+
+============== update with un-indexed column ====================
+mysql> update students set address = "1993 O'Keefe FieldsDeborahfurt, SC 85178-6867" where name like "Arne Bode DDS";
+Query OK, 1 row affected (11.50 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+============== update with indexed column ====================
+mysql> update students set address = "2093 O'Keefe FieldsDeborahfurt, SC 85178-6867" where regNo = 21365285423197;
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+============== delete with un-indexed column ====================
+mysql> delete from students where name like "Arne Bode DDS";
+Query OK, 1 row affected (11.43 sec)
+
+============== delete with indexed column ====================
+mysql> delete from students where regNo = 86436269977492;
+Query OK, 1 row affected (0.01 sec)
+
+============== alter table with 20M raw ====================
+mysql> alter table students add column phone char(50);
+Query OK, 0 rows affected (9 min 34.69 sec)
+Records: 0  Duplicates: 0  Warnings: 0

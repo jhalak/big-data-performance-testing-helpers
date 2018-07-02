@@ -9,7 +9,7 @@ require_once "vendor/autoload.php";
 
 if (count($argv) < 4) {
 	print "Argument missing: " . PHP_EOL;
-	print "Example: php write-data-in-file.php [startId] [endId]" . PHP_EOL;
+	print "Example: php write-data-in-file.php [filename] [startId] [endId]" . PHP_EOL;
 	exit();
 }
 
