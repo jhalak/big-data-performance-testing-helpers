@@ -1,9 +1,10 @@
-Machine type : AWS mysql db.t2.medium
-Engine type  : MySQL 5.6.39
-Storage Type : General Purpose (SSD)
+<p><code><strong>Machine type :</strong></code>AWS mysql db.t2.medium</p>
+<p><code><strong>Engine type  &nbsp;:</strong></code> MySQL 5.6.39</p>
+<p><code><strong>Storage Type :</strong></code> General Purpose (SSD)</p>
+<p><code><strong>Row count    &nbsp; &nbsp;:</strong></code> 20M</p>
 
-============== Select with un-indexed ====================
-
+#### SELECT with un-indexed column
+<pre>
 mysql> select * from students where id = 19999999;
 +----------+------------+---------------+----------------+-----------------------------------------------+
 | id       | joinDate   | name          | regNo          | address                                       |
@@ -43,8 +44,10 @@ mysql> select * from students where address like "1793 O'Keefe FieldsDeborahfurt
 | 19999999 | 1986-10-18 | Arne Bode DDS | 21365285423197 | 1793 O'Keefe FieldsDeborahfurt, SC 85178-6867 |
 +----------+------------+---------------+----------------+-----------------------------------------------+
 1 row in set (7.74 sec)
+</pre>
 
-=============== Creating index ================
+#### Creating index
+<pre>
 mysql> create index idx_regNo on students (regNo);
 Query OK, 0 rows affected (1 min 24.82 sec)
 Records: 0  Duplicates: 0  Warnings: 0
@@ -52,8 +55,10 @@ Records: 0  Duplicates: 0  Warnings: 0
 mysql> create index idx_joinDate on students (joinDate);
 Query OK, 0 rows affected (1 min 12.24 sec)
 Records: 0  Duplicates: 0  Warnings: 0
+</pre>
 
-============== Select with indexed data ====================
+#### SELECT with indexed data
+<pre>
 mysql> select * from students where regNo = 21365285423197;
 +----------+------------+---------------+----------------+-----------------------------------------------+
 | id       | joinDate   | name          | regNo          | address                                       |
@@ -69,8 +74,10 @@ mysql> select * from students where name like "Arne Bode DDS";
 | 19999999 | 1986-10-18 | Arne Bode DDS | 21365285423197 | 1793 O'Keefe FieldsDeborahfurt, SC 85178-6867 |
 +----------+------------+---------------+----------------+-----------------------------------------------+
 1 row in set (7.68 sec)
+</pre>
 
-============= ORDER BY with non indexed column ===================
+#### ORDER BY with non indexed column
+<pre>
 mysql> select * from students order by 2 desc limit 5;
 +----------+------------+----------------------+----------------+---------------------------------------------------------+-------+
 | id       | joinDate   | name                 | regNo          | address                                                 | phone |
@@ -82,8 +89,10 @@ mysql> select * from students order by 2 desc limit 5;
 | 12567554 | 2018-07-02 | Prof. Lavern Hoppe   | 85999859822758 | 94100 Crist Corner Apt. 698Ferminchester, HI 49292-6577 | NULL  |
 +----------+------------+----------------------+----------------+---------------------------------------------------------+-------+
 5 rows in set (7 min 39.66 sec)
+</pre>
 
-============= ORDER BY with indexed column ===================
+#### ORDER BY with indexed column
+<pre>
 mysql> select * from students order by 2 desc limit 5;
 +----------+------------+-------------------------+----------------+----------------------------------------------------------+-------+
 | id       | joinDate   | name                    | regNo          | address                                                  | phone |
@@ -95,26 +104,34 @@ mysql> select * from students order by 2 desc limit 5;
 | 19705240 | 2018-07-02 | Stewart Heaney DDS      | 95638570091013 | 362 Jayme Shore Apt. 050Port Daphneybury, DE 82522-3288  | NULL  |
 +----------+------------+-------------------------+----------------+----------------------------------------------------------+-------+
 5 rows in set (0.00 sec)
+</pre>
 
-============== update with un-indexed column ====================
+#### UPDATE with un-indexed column
+<pre>
 mysql> update students set address = "1993 O'Keefe FieldsDeborahfurt, SC 85178-6867" where name like "Arne Bode DDS";
 Query OK, 1 row affected (11.50 sec)
 Rows matched: 1  Changed: 1  Warnings: 0
-
-============== update with indexed column ====================
+</pre>
+#### UPDATE with indexed column
+<pre>
 mysql> update students set address = "2093 O'Keefe FieldsDeborahfurt, SC 85178-6867" where regNo = 21365285423197;
 Query OK, 1 row affected (0.00 sec)
 Rows matched: 1  Changed: 1  Warnings: 0
+</pre>
 
-============== delete with un-indexed column ====================
+#### DELETE with un-indexed column
+<pre>
 mysql> delete from students where name like "Arne Bode DDS";
 Query OK, 1 row affected (11.43 sec)
-
-============== delete with indexed column ====================
+</pre>
+#### DELETE with indexed column
+<pre>
 mysql> delete from students where regNo = 86436269977492;
 Query OK, 1 row affected (0.01 sec)
+</pre>
 
-============== alter table with 20M raw ====================
+#### ALTER table with 20M raw
+<pre>
 mysql> alter table students add column phone char(50);
 Query OK, 0 rows affected (9 min 34.69 sec)
 Records: 0  Duplicates: 0  Warnings: 0
@@ -145,11 +162,11 @@ mysql> ALTER TABLE students
     -> );
 Query OK, 19999998 rows affected (9 min 39.41 sec)
 Records: 19999998  Duplicates: 0  Warnings: 0
+</pre>
 
-
-============= Select after partitioning based on join date =============
-
-==== Selecting only with un-indexed column =======
+### SELECT after partitioning based on join date
+#### SELECT only with un-indexed column
+<pre>
 mysql> select * from students where name like "Arne Bode DDS";
 Empty set (19.52 sec)
 
@@ -162,8 +179,10 @@ mysql> select * from students where name like "Edyth Stokes";
 ......................
 +----------+------------+--------------+----------------+--------------------------------------------------------------+-------+
 15 rows in set (17.02 sec)
+</pre>
 
-==== Selecting with un-indexed column but added with partitioned column that has index =======
+#### SELECT with un-indexed column but added with partitioned column that has index
+<pre>
 mysql> select * from students where name like "Edyth Stokes" and joinDate = "1976-01-14";
 +---------+------------+--------------+----------------+-------------------------------------------+-------+
 | id      | joinDate   | name         | regNo          | address                                   | phone |
@@ -171,13 +190,17 @@ mysql> select * from students where name like "Edyth Stokes" and joinDate = "197
 | 3510739 | 1976-01-14 | Edyth Stokes | 98793902582147 | 87044 Nova VillageArlofort, AL 17339-9796 | NULL  |
 +---------+------------+--------------+----------------+-------------------------------------------+-------+
 1 row in set (0.10 sec)
+</pre>
 
-======== Dropping index from joining date =========
+#### Dropping index from joining date
+<pre>
 mysql> alter table students drop index idx_joinDate;
 Query OK, 0 rows affected (0.41 sec)
 Records: 0  Duplicates: 0  Warnings: 0
+</pre>
 
-======== Selecting with un-indexed column but added with partitioned column that has no index =======
+#### SELECT with un-indexed column but added with partitioned column that has no index
+<pre>
 mysql> select * from students where name like "Edyth Stokes" and joinDate = "1976-01-14";
 +---------+------------+--------------+----------------+-------------------------------------------+-------+
 | id      | joinDate   | name         | regNo          | address                                   | phone |
@@ -185,8 +208,10 @@ mysql> select * from students where name like "Edyth Stokes" and joinDate = "197
 | 3510739 | 1976-01-14 | Edyth Stokes | 98793902582147 | 87044 Nova VillageArlofort, AL 17339-9796 | NULL  |
 +---------+------------+--------------+----------------+-------------------------------------------+-------+
 1 row in set (4.10 sec)
+</pre>
 
-============ select from partition =============
+#### SELECT from partition
+<pre>
 mysql> select * from students PARTITION (p2020) order by joinDate asc limit 2;
 +----------+------------+---------------------+----------------+--------------------------------------------------+-------+
 | id       | joinDate   | name                | regNo          | address                                          | phone |
@@ -195,3 +220,4 @@ mysql> select * from students PARTITION (p2020) order by joinDate asc limit 2;
 |   673281 | 2010-01-01 | Prof. Maxie Lesch   | 27766045318517 | 854 Norberto Camp Apt. 666New Charlene, ME 18455 | NULL  |
 +----------+------------+---------------------+----------------+--------------------------------------------------+-------+
 2 rows in set (0.63 sec)
+</pre>
