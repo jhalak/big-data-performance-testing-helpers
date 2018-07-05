@@ -238,18 +238,18 @@ Query OK, 0 rows affected (11 min 8.90 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 mysql> ALTER TABLE students
-    -> PARTITION BY RANGE (YEAR(joinDate)) (
-    -> PARTITION p1970l VALUES LESS THAN (1970),
-    -> PARTITION p1980 VALUES LESS THAN (1980),
-    -> PARTITION p1990 VALUES LESS THAN (1990),
-    -> PARTITION p2000 VALUES LESS THAN (2000),
-    -> PARTITION p2010 VALUES LESS THAN (2010),
-    -> PARTITION p2020 VALUES LESS THAN (2020),
-    -> PARTITION p2030 VALUES LESS THAN (2030),
-    -> PARTITION p2040 VALUES LESS THAN (2040),
-    -> PARTITION p2050 VALUES LESS THAN (2050),
-    -> PARTITION p2050p VALUES LESS THAN MAXVALUE
-    -> );
+       PARTITION BY RANGE (YEAR(joinDate)) (
+       	PARTITION p1970l VALUES LESS THAN (1970),
+       	PARTITION p1980 VALUES LESS THAN (1980),
+       	PARTITION p1990 VALUES LESS THAN (1990),
+       	PARTITION p2000 VALUES LESS THAN (2000),
+       	PARTITION p2010 VALUES LESS THAN (2010),
+       	PARTITION p2020 VALUES LESS THAN (2020),
+       	PARTITION p2030 VALUES LESS THAN (2030),
+       	PARTITION p2040 VALUES LESS THAN (2040),
+       	PARTITION p2050 VALUES LESS THAN (2050),
+       	PARTITION p2050p VALUES LESS THAN MAXVALUE
+       );
 Query OK, 19999998 rows affected (9 min 39.41 sec)
 Records: 19999998  Duplicates: 0  Warnings: 0
 </pre>
@@ -284,13 +284,27 @@ mysql> SELECT * FROM students WHERE name LIKE "Edyth Stokes" AND joinDate = "197
 
 #### Dropping index from joining date
 <pre>
-mysql> ALTER TABLE students drop index idx_joinDate;
-Query OK, 0 rows affected (0.41 sec)
-Records: 0  Duplicates: 0  Warnings: 0
+mysql> ALTER TABLE students DROP INDEX idx_joinDate_name;
+       Query OK, 0 rows affected (0.07 sec)
+       Records: 0  Duplicates: 0  Warnings: 0
 </pre>
 
 #### SELECT with un-indexed column but added with partitioned column that has no index
 <pre>
+mysql> EXPLAIN SELECT * FROM students WHERE joinDate = "1993-01-01" AND `name` LIKE "Celia Bailey" LIMIT 10\G
+*************************** 1. row ***************************
+           id: 1
+  select_type: SIMPLE
+        table: students
+         type: ALL
+possible_keys: NULL
+          key: NULL
+      key_len: NULL
+          ref: NULL
+         rows: 4047660
+        Extra: Using where
+1 row in set (0.00 sec)
+
 mysql> SELECT * FROM students WHERE name LIKE "Edyth Stokes" AND joinDate = "1976-01-14";
 +---------+------------+--------------+----------------+-------------------------------------------+-------+
 | id      | joinDate   | name         | regNo          | address                                   | phone |
