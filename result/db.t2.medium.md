@@ -5,7 +5,7 @@
 
 #### SELECT with un-indexed column
 <pre>
-mysql> select * from students where id = 19999999;
+mysql> SELECT * FROM students WHERE id = 19999999;
 +----------+------------+---------------+----------------+-----------------------------------------------+
 | id       | joinDate   | name          | regNo          | address                                       |
 +----------+------------+---------------+----------------+-----------------------------------------------+
@@ -13,23 +13,47 @@ mysql> select * from students where id = 19999999;
 +----------+------------+---------------+----------------+-----------------------------------------------+
 1 row in set (0.01 sec)
 
-mysql> select count(*) from students where joinDate = "1986-10-18";
+mysql> SELECT COUNT(*) FROM students WHERE joinDate = "1986-10-18";
 +----------+
 | count(*) |
 +----------+
 |     1183 |
 +----------+
 1 row in set (4.07 sec)
+</pre>
 
-mysql> select * from students where regNo = 21365285423197;
+#### SELECT before indexing on `regNo`
+<pre>
+mysql> SELECT * FROM students WHERE regNo = 21365285423197;
 +----------+------------+---------------+----------------+-----------------------------------------------+
 | id       | joinDate   | name          | regNo          | address                                       |
 +----------+------------+---------------+----------------+-----------------------------------------------+
 | 19999999 | 1986-10-18 | Arne Bode DDS | 21365285423197 | 1793 O'Keefe FieldsDeborahfurt, SC 85178-6867 |
 +----------+------------+---------------+----------------+-----------------------------------------------+
 1 row in set (7.17 sec)
+</pre>
 
-mysql> select * from students where name like "Arne Bode DDS";
+#### Creating INDEX on `regNo`
+<pre>
+mysql> CREATE INDEX idx_regNo ON students (regNo);
+Query OK, 0 rows affected (1 min 24.82 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+</pre>
+
+#### SELECT after indexing
+<pre>
+mysql> SELECT * FROM students WHERE regNo = 21365285423197;
++----------+------------+---------------+----------------+-----------------------------------------------+
+| id       | joinDate   | name          | regNo          | address                                       |
++----------+------------+---------------+----------------+-----------------------------------------------+
+| 19999999 | 1986-10-18 | Arne Bode DDS | 21365285423197 | 1793 O'Keefe FieldsDeborahfurt, SC 85178-6867 |
++----------+------------+---------------+----------------+-----------------------------------------------+
+1 row in set (0.03 sec)
+</pre>
+
+#### SELECT before indexing on <code>joinDate</code> with <code>name</code>
+<pre>
+mysql> SELECT * FROM students WHERE name LIKE "Arne Bode DDS";
 +----------+------------+---------------+----------------+-----------------------------------------------+
 | id       | joinDate   | name          | regNo          | address                                       |
 +----------+------------+---------------+----------------+-----------------------------------------------+
@@ -37,37 +61,25 @@ mysql> select * from students where name like "Arne Bode DDS";
 +----------+------------+---------------+----------------+-----------------------------------------------+
 1 row in set (7.73 sec)
 
-mysql> select * from students where address like "1793 O'Keefe FieldsDeborahfurt, SC 85178-6867";
+mysql> SELECT * FROM students WHERE address LIKE "1793 O'Keefe FieldsDeborahfurt, SC 85178-6867";
 +----------+------------+---------------+----------------+-----------------------------------------------+
 | id       | joinDate   | name          | regNo          | address                                       |
 +----------+------------+---------------+----------------+-----------------------------------------------+
 | 19999999 | 1986-10-18 | Arne Bode DDS | 21365285423197 | 1793 O'Keefe FieldsDeborahfurt, SC 85178-6867 |
 +----------+------------+---------------+----------------+-----------------------------------------------+
 1 row in set (7.74 sec)
-</pre>
+</pre> 
 
-#### Creating index
+#### Creating index on <code>joinDate</code>
 <pre>
-mysql> create index idx_regNo on students (regNo);
-Query OK, 0 rows affected (1 min 24.82 sec)
-Records: 0  Duplicates: 0  Warnings: 0
-
-mysql> create index idx_joinDate on students (joinDate);
+mysql> CREATE INDEX idx_joinDate ON students (joinDate);
 Query OK, 0 rows affected (1 min 12.24 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 </pre>
 
-#### SELECT with indexed data
+#### SELECT after indexing on <code>joinDate</code> with <code>name</code>
 <pre>
-mysql> select * from students where regNo = 21365285423197;
-+----------+------------+---------------+----------------+-----------------------------------------------+
-| id       | joinDate   | name          | regNo          | address                                       |
-+----------+------------+---------------+----------------+-----------------------------------------------+
-| 19999999 | 1986-10-18 | Arne Bode DDS | 21365285423197 | 1793 O'Keefe FieldsDeborahfurt, SC 85178-6867 |
-+----------+------------+---------------+----------------+-----------------------------------------------+
-1 row in set (0.03 sec)
-
-mysql> select * from students where name like "Arne Bode DDS";
+mysql> SELECT * FROM students WHERE name LIKE "Arne Bode DDS";
 +----------+------------+---------------+----------------+-----------------------------------------------+
 | id       | joinDate   | name          | regNo          | address                                       |
 +----------+------------+---------------+----------------+-----------------------------------------------+
@@ -76,9 +88,83 @@ mysql> select * from students where name like "Arne Bode DDS";
 1 row in set (7.68 sec)
 </pre>
 
+##### SELECT with <code>joinDate</code> and <code>name</code> from un-indexed data
+<pre>
+mysql> SELECT * FROM students WHERE joinDate = "1993-01-01" AND `name` LIKE "Celia Bailey" LIMIT 10;
++-------+------------+--------------+----------------+------------------------------------------------+-------+
+| id    | joinDate   | name         | regNo          | address                                        | phone |
++-------+------------+--------------+----------------+------------------------------------------------+-------+
+| 51519 | 1993-01-01 | Celia Bailey | 68062737285180 | 31910 Rowe Pines Suite 307New Dahlia, NH 03904 | NULL  |
++-------+------------+--------------+----------------+------------------------------------------------+-------+
+1 row in set (7 min 33.37 sec)
+</pre>
+
+##### Creating index on <code>joinDate</code> and <code>name</code>
+<pre>
+mysql> CREATE INDEX idx_joinDate_name ON students (`joinDate`, `name`);
+Query OK, 0 rows affected (2 min 41.82 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+</pre>
+
+##### SELECT with <code>joinDate</code> and <code>name</code> from indexed data
+<pre>
+mysql> SELECT * FROM students WHERE joinDate = "1993-01-01" AND name LIKE "Celia Bailey";
++-------+------------+--------------+----------------+------------------------------------------------+-------+
+| id    | joinDate   | name         | regNo          | address                                        | phone |
++-------+------------+--------------+----------------+------------------------------------------------+-------+
+| 51519 | 1993-01-01 | Celia Bailey | 68062737285180 | 31910 Rowe Pines Suite 307New Dahlia, NH 03904 | NULL  |
++-------+------------+--------------+----------------+------------------------------------------------+-------+
+1 row in set (0.00 sec)
+</pre>
+
+##### EXPLAIN SELECT with indexed columns (<code>joinDate + name</code>) in different way
+<pre>
+mysql> EXPLAIN SELECT * FROM students WHERE joinDate = "1993-01-01" limit 10 \G
+*************************** 1. row ***************************
+           id: 1
+  select_type: SIMPLE
+        table: students
+         type: ref
+possible_keys: idx_joinDate_name
+          key: idx_joinDate_name
+      key_len: 3
+          ref: const
+         rows: 1229
+        Extra: NULL
+1 row in set (0.00 sec)
+
+mysql> EXPLAIN SELECT * FROM students WHERE joinDate = "1993-01-01" AND name LIKE "Celia Bailey"\G
+*************************** 1. row ***************************
+           id: 1
+  select_type: SIMPLE
+        table: students
+         type: range
+possible_keys: idx_joinDate_name
+          key: idx_joinDate_name
+      key_len: 770
+          ref: NULL
+         rows: 1
+        Extra: Using index condition
+1 row in set (0.00 sec)
+
+mysql> EXPLAIN SELECT * FROM students WHERE name LIKE "Celia Bailey"\G
+*************************** 1. row ***************************
+           id: 1
+  select_type: SIMPLE
+        table: students
+         type: ALL
+possible_keys: NULL
+          key: NULL
+      key_len: NULL
+          ref: NULL
+         rows: 19337691
+        Extra: Using where
+1 row in set (0.00 sec)
+</pre>
+
 #### ORDER BY with non indexed column
 <pre>
-mysql> select * from students order by 2 desc limit 5;
+mysql> SELECT * FROM students ORDER BY 2 DESC LIMIT 5;
 +----------+------------+----------------------+----------------+---------------------------------------------------------+-------+
 | id       | joinDate   | name                 | regNo          | address                                                 | phone |
 +----------+------------+----------------------+----------------+---------------------------------------------------------+-------+
@@ -93,7 +179,7 @@ mysql> select * from students order by 2 desc limit 5;
 
 #### ORDER BY with indexed column
 <pre>
-mysql> select * from students order by 2 desc limit 5;
+mysql> SELECT * FROM students ORDER BY 2 DESC LIMIT 5;
 +----------+------------+-------------------------+----------------+----------------------------------------------------------+-------+
 | id       | joinDate   | name                    | regNo          | address                                                  | phone |
 +----------+------------+-------------------------+----------------+----------------------------------------------------------+-------+
@@ -108,41 +194,45 @@ mysql> select * from students order by 2 desc limit 5;
 
 #### UPDATE with un-indexed column
 <pre>
-mysql> update students set address = "1993 O'Keefe FieldsDeborahfurt, SC 85178-6867" where name like "Arne Bode DDS";
+mysql> UPDATE students SET address = "1993 O'Keefe FieldsDeborahfurt, SC 85178-6867" WHERE name LIKE "Arne Bode DDS";
 Query OK, 1 row affected (11.50 sec)
 Rows matched: 1  Changed: 1  Warnings: 0
 </pre>
 #### UPDATE with indexed column
 <pre>
-mysql> update students set address = "2093 O'Keefe FieldsDeborahfurt, SC 85178-6867" where regNo = 21365285423197;
+mysql> UPDATE students SET address = "2093 O'Keefe FieldsDeborahfurt, SC 85178-6867" WHERE regNo = 21365285423197;
 Query OK, 1 row affected (0.00 sec)
 Rows matched: 1  Changed: 1  Warnings: 0
 </pre>
 
 #### DELETE with un-indexed column
 <pre>
-mysql> delete from students where name like "Arne Bode DDS";
+mysql> DELETE FROM students WHERE name LIKE "Arne Bode DDS";
 Query OK, 1 row affected (11.43 sec)
 </pre>
 #### DELETE with indexed column
 <pre>
-mysql> delete from students where regNo = 86436269977492;
+mysql> DELETE FROM students WHERE regNo = 86436269977492;
 Query OK, 1 row affected (0.01 sec)
 </pre>
 
-#### ALTER table with 20M raw
+### ALTER table with 20M raw
+#### Add a new column to the table
 <pre>
-mysql> alter table students add column phone char(50);
+mysql> ALTER TABLE students add column phone char(50);
 Query OK, 0 rows affected (9 min 34.69 sec)
 Records: 0  Duplicates: 0  Warnings: 0
+</pre>
 
-mysql> ALTER TABLE students
-    -> ADD CONSTRAINT idx_unique_regNo_joinDate UNIQUE (joinDate, regNo);
+#### Add a new <code>UNIQUE</code> key to the table
+<pre>
+mysql> ALTER TABLE students ADD CONSTRAINT idx_unique_regNo_joinDate UNIQUE (joinDate, regNo);
 Query OK, 0 rows affected (1 min 54.91 sec)
 Records: 0  Duplicates: 0  Warnings: 0
+</pre>
 
-mysql> create index idx_regNo on students (regNo);
-
+#### Drop primary key and add another primary key with 2 fields
+<pre>
 mysql> ALTER TABLE students DROP PRIMARY KEY, ADD PRIMARY KEY (id, joinDate);
 Query OK, 0 rows affected (11 min 8.90 sec)
 Records: 0  Duplicates: 0  Warnings: 0
@@ -167,10 +257,10 @@ Records: 19999998  Duplicates: 0  Warnings: 0
 ### SELECT after partitioning based on join date
 #### SELECT only with un-indexed column
 <pre>
-mysql> select * from students where name like "Arne Bode DDS";
+mysql> SELECT * FROM students WHERE name LIKE "Arne Bode DDS";
 Empty set (19.52 sec)
 
-mysql> select * from students where name like "Edyth Stokes";
+mysql> SELECT * FROM students WHERE name LIKE "Edyth Stokes";
 +----------+------------+--------------+----------------+--------------------------------------------------------------+-------+
 | id       | joinDate   | name         | regNo          | address                                                      | phone |
 +----------+------------+--------------+----------------+--------------------------------------------------------------+-------+
@@ -183,7 +273,7 @@ mysql> select * from students where name like "Edyth Stokes";
 
 #### SELECT with un-indexed column but added with partitioned column that has index
 <pre>
-mysql> select * from students where name like "Edyth Stokes" and joinDate = "1976-01-14";
+mysql> SELECT * FROM students WHERE name LIKE "Edyth Stokes" AND joinDate = "1976-01-14";
 +---------+------------+--------------+----------------+-------------------------------------------+-------+
 | id      | joinDate   | name         | regNo          | address                                   | phone |
 +---------+------------+--------------+----------------+-------------------------------------------+-------+
@@ -194,14 +284,14 @@ mysql> select * from students where name like "Edyth Stokes" and joinDate = "197
 
 #### Dropping index from joining date
 <pre>
-mysql> alter table students drop index idx_joinDate;
+mysql> ALTER TABLE students drop index idx_joinDate;
 Query OK, 0 rows affected (0.41 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 </pre>
 
 #### SELECT with un-indexed column but added with partitioned column that has no index
 <pre>
-mysql> select * from students where name like "Edyth Stokes" and joinDate = "1976-01-14";
+mysql> SELECT * FROM students WHERE name LIKE "Edyth Stokes" AND joinDate = "1976-01-14";
 +---------+------------+--------------+----------------+-------------------------------------------+-------+
 | id      | joinDate   | name         | regNo          | address                                   | phone |
 +---------+------------+--------------+----------------+-------------------------------------------+-------+
@@ -212,7 +302,7 @@ mysql> select * from students where name like "Edyth Stokes" and joinDate = "197
 
 #### SELECT from partition
 <pre>
-mysql> select * from students PARTITION (p2020) order by joinDate asc limit 2;
+mysql> SELECT * FROM students PARTITION (p2020) ORDER BY joinDate ASC LIMIT 2;
 +----------+------------+---------------------+----------------+--------------------------------------------------+-------+
 | id       | joinDate   | name                | regNo          | address                                          | phone |
 +----------+------------+---------------------+----------------+--------------------------------------------------+-------+
